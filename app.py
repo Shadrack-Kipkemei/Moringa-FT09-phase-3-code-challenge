@@ -66,5 +66,23 @@ def main():
     for article in articles:
         print(Article(article["id"], article["title"], article["content"], article["author_id"], article["magazine_id"]))
 
+
+    #Create new author
+    new_author = Author(1, "John Doe")
+
+    #Verify the author is added to the database
+    retrieved_author = Author.get_by_id(new_author.id)
+    print(retrieved_author.name)
+
+    #Attempt to change the name(should print an error message)
+    new_author.name = "Jane Doe"
+
+    #Delete the author
+    Author.delete(new_author.id)
+
+    #Verify the author is deleted
+    retrieved_author = Author.get_by_id(new_author.id)
+    print(retrieved_author)
+
 if __name__ == "__main__":
     main()
