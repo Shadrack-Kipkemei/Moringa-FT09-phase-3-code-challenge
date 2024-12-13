@@ -68,7 +68,7 @@ def main():
 
 
     #Create new author
-    new_author = Author.create("John Doe") 
+    new_author = Author.create(author_name) 
     print(f"New Author created with ID: {new_author.id}")
 
     #Verify the author is added to the database
@@ -92,11 +92,10 @@ def main():
     else: 
         print("Author deletion verified, not found")
 
-    #Testing Magazine class
-    print("Creating new magazine...")
-    new_magazine = Magazine(0, "Tech Today", "Technology")
+    #Create new magazine
+    new_magazine = Magazine(0, magazine_name, magazine_category)
 
-    print(f"Magazine created: {new_magazine}")
+    print(f"New Magazine created with ID: {new_magazine.id}")
 
     # Retrieve the magazine by ID
     retrieved_magazine = Magazine.get_by_id(new_magazine.id)
@@ -128,8 +127,24 @@ def main():
     retrieved_article = Article.get_by_id(new_article.id) 
     if retrieved_article: 
         print(f"Retrieved Article: {retrieved_article.title}") 
+        print(f"Article Author: {retrieved_article.author.name}") 
+        print(f"Article Magazine: {retrieved_article.magazine.name}") 
     else: 
         print("Article retrieval failed")
+
+    # Test Author methods
+    author_articles = new_author.articles() 
+    print(f"Articles by {new_author.name}: {[article.title for article in author_articles]}")
+
+    author_magazines = new_author.magazines() 
+    print(f"Magazines associated with {new_author.name}: {[magazine.name for magazine in author_magazines]}")
+
+    # Test Magazine methods
+    magazine_articles = new_magazine.articles() 
+    print(f"Articles in {new_magazine.name}: {[article.title for article in magazine_articles]}")
+
+    magazine_contributors = new_magazine.contributors() 
+    print(f"Contributors to {new_magazine.name}: {[author.name for author in magazine_contributors]}")
 
     # Attempt to change the title(should print error message)
     new_article.title = "AI in 2025"

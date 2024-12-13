@@ -40,6 +40,48 @@ class Article:
         else:
             print("Title must be a string between 5 and 50 characters inclusive.")
 
+    @property
+    def author(self):
+        from models.author import Author  # Local import to avoid circular dependency
+        # Fetch the author using SQL JOIN
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT authors.id, authors.name
+            FROM articles
+            JOIN authors ON articles.author_id = authors.id
+            WHERE articles.id = ?
+        ''', (self._id,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            print(f"Author found: {row['id']}, {row['name']}")  # Debug statement
+            return Author(row['id'], row['name'])
+        else:
+            print(f"No author found for article with ID {self._id}")
+            return None
+
+    @property
+    def magazine(self):
+        from models.magazine import Magazine  # Local import to avoid circular dependency
+        # Fetch the magazine using SQL JOIN
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT magazines.id, magazines.name, magazines.category
+            FROM articles
+            JOIN magazines ON articles.magazine_id = magazines.id
+            WHERE articles.id = ?
+        ''', (self._id,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            print(f"Magazine found: {row['id']}, {row['name']}, {row['category']}")  # Debug statement
+            return Magazine(row['id'], row['name'], row['category'])
+        else:
+            print(f"No magazine found for article with ID {self._id}")
+            return None
+
     def __repr__(self):
         return f'<Article {self.title}>'
 
