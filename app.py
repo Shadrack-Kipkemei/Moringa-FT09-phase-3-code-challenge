@@ -160,6 +160,23 @@ def main():
     else: 
         print("Article deletion verified, not found")
 
+    # Test article_titles method
+    print("Testing article_titles method...") 
+    titles = new_magazine.article_titles() 
+    if titles: 
+        print(f"Article Titles: {titles}") 
+    else: 
+        print("No articles found for this magazine")
+    
+    #Test contributing_authors method
+    print("Testing contributing_authors method...") 
+    contributing_authors = new_magazine.contributing_authors() 
+    if contributing_authors: 
+        print(f"Contributing Authors: {[author.name for author in contributing_authors]}") 
+    else: 
+        print("No contributing authors found for this magazine")
+
+
 
 
 if __name__ == "__main__":

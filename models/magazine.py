@@ -6,16 +6,19 @@ class Magazine:
         self._id = id
         self.name = name
         self.category = category
-        self.save()
+        if self._id == 0:
+            self.save()
 
     def save(self):
         # Save the magazine to the database
         conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('INSERT INTO magazines (name, category) VALUES (?, ?)', (self._name, self._category))
-        conn.commit()
-        self._id = cursor.lastrowid
-        conn.close()
+        try:
+            cursor = conn.cursor()
+            cursor.execute('INSERT INTO magazines (name, category) VALUES (?, ?)', (self.name, self.category))
+            conn.commit()
+            self._id = cursor.lastrowid
+        finally:
+            conn.close()
 
     @property
     def id(self):
@@ -56,50 +59,98 @@ class Magazine:
     @classmethod
     def get_by_id(cls, magazine_id):
         conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM magazines WHERE id = ?', (magazine_id,))
-        row = cursor.fetchone()
-        conn.close()
-        if row:
-            return cls(row['id'], row['name'], row['category'])
+        try:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM magazines WHERE id = ?', (magazine_id,))
+            row = cursor.fetchone()
+            if row:
+                return cls(row['id'], row['name'], row['category'])
+        finally:
+            conn.close()
 
     @classmethod
     def delete(cls, magazine_id):
         conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('DELETE FROM magazines WHERE id = ?', (magazine_id,))
-        conn.commit()
-        conn.close()
-        if cursor.rowcount == 0:
-            print(f"No magazine found with ID {magazine_id}")
+        try:
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM magazines WHERE id = ?', (magazine_id,))
+            conn.commit()
+            if cursor.rowcount == 0:
+                print(f"No magazine found with ID {magazine_id}")
+        finally:
+            conn.close()
 
     def articles(self):
         from models.article import Article  # Local import to avoid circular dependency
         # Fetch all articles associated with the magazine using SQL JOIN
         conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT articles.id, articles.title, articles.content, articles.author_id, articles.magazine_id
-            FROM articles
-            JOIN magazines ON articles.magazine_id = magazines.id
-            WHERE magazines.id = ?
-        ''', (self._id,))
-        rows = cursor.fetchall()
-        conn.close()
-        return [Article(row['id'], row['title'], row['content'], row['author_id'], row['magazine_id']) for row in rows]
+        try:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT articles.id, articles.title, articles.content, articles.author_id, articles.magazine_id
+                FROM articles
+                JOIN magazines ON articles.magazine_id = magazines.id
+                WHERE magazines.id = ?
+            ''', (self._id,))
+            rows = cursor.fetchall()
+            return [Article(row['id'], row['title'], row['content'], row['author_id'], row['magazine_id']) for row in rows]
+        finally:
+            conn.close()
 
     def contributors(self):
         from models.author import Author  # Local import to avoid circular dependency
         # Fetch all authors associated with the magazine using SQL JOIN
         conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT DISTINCT authors.id, authors.name
-            FROM articles
-            JOIN authors ON articles.author_id = authors.id
-            JOIN magazines ON articles.magazine_id = magazines.id
-            WHERE magazines.id = ?
-        ''', (self._id,))
-        rows = cursor.fetchall()
-        conn.close()
-        return [Author(row['id'], row['name']) for row in rows]
+        try:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT DISTINCT authors.id, authors.name
+                FROM articles
+                JOIN authors ON articles.author_id = authors.id
+                JOIN magazines ON articles.magazine_id = magazines.id
+                WHERE magazines.id = ?
+            ''', (self._id,))
+            rows = cursor.fetchall()
+            return [Author(row['id'], row['name']) for row in rows]
+        finally:
+            conn.close()
+
+    def article_titles(self):
+        # Fetch the titles of all articles for this magazine
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT articles.title
+                FROM articles
+                WHERE articles.magazine_id = ?
+            ''', (self._id,))
+            rows = cursor.fetchall()
+            if rows:
+                return [row['title'] for row in rows]
+            else:
+                return None
+        finally:
+            conn.close()
+
+    def contributing_authors(self):
+        from models.author import Author  # Local import to avoid circular dependency
+        # Fetch authors who have written more than 2 articles for this magazine
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT authors.id, authors.name
+                FROM authors
+                JOIN articles ON authors.id = articles.author_id
+                WHERE articles.magazine_id = ?
+                GROUP BY authors.id, authors.name
+                HAVING COUNT(articles.id) > 2
+            ''', (self._id,))
+            rows = cursor.fetchall()
+            if rows:
+                return [Author(row['id'], row['name']) for row in rows]
+            else:
+                return None
+        finally:
+            conn.close()
