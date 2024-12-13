@@ -19,19 +19,13 @@ def main():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-
-    '''
-        The following is just for testing purposes, 
-        you can modify it to meet the requirements of your implmentation.
-    '''
-
     # Create an author
     cursor.execute('INSERT INTO authors (name) VALUES (?)', (author_name,))
-    author_id = cursor.lastrowid # Use this to fetch the id of the newly created author
+    author_id = cursor.lastrowid
 
     # Create a magazine
     cursor.execute('INSERT INTO magazines (name, category) VALUES (?,?)', (magazine_name, magazine_category))
-    magazine_id = cursor.lastrowid # Use this to fetch the id of the newly created magazine
+    magazine_id = cursor.lastrowid
 
     # Create an article
     cursor.execute('INSERT INTO articles (title, content, author_id, magazine_id) VALUES (?, ?, ?, ?)',
@@ -39,9 +33,7 @@ def main():
 
     conn.commit()
 
-    # Query the database for inserted records. 
-    # The following fetch functionality should probably be in their respective models
-
+    # Query the database for inserted records
     cursor.execute('SELECT * FROM magazines')
     magazines = cursor.fetchall()
 
@@ -66,118 +58,20 @@ def main():
     for article in articles:
         print(Article(article["id"], article["title"], article["content"], article["author_id"], article["magazine_id"]))
 
-
-    #Create new author
-    new_author = Author.create(author_name) 
-    print(f"New Author created with ID: {new_author.id}")
-
-    #Verify the author is added to the database
-    retrieved_author = Author.get_by_id(new_author.id) 
-    if retrieved_author: 
-        print(f"Retrieved Author: {retrieved_author.name}") 
-    else: 
-        print("Author retrieval failed")
-
-    #Attempt to change the name(should print an error message)
-    new_author.name = "Jane Doe"
-
-    #Delete the author
-    Author.delete(new_author.id) 
-    print(f"Author with ID {new_author.id} deleted")
-
-    #Verify the author is deleted
-    retrieved_author = Author.get_by_id(new_author.id) 
-    if retrieved_author: 
-        print(f"Failed to delete author: {retrieved_author}") 
-    else: 
-        print("Author deletion verified, not found")
-
-    #Create new magazine
-    new_magazine = Magazine(0, magazine_name, magazine_category)
-
-    print(f"New Magazine created with ID: {new_magazine.id}")
-
-    # Retrieve the magazine by ID
-    retrieved_magazine = Magazine.get_by_id(new_magazine.id)
-    if retrieved_magazine:
-        print(f"Magazine_retrieved: {retrieved_magazine}")
+    # Test relationship methods
+    retrieved_article = Article.get_by_id(articles[0]["id"])
+    if retrieved_article:
+        print(f"Retrieved Article: {retrieved_article.title}")
+        if retrieved_article.author:
+            print(f"Article Author: {retrieved_article.author.name}")
+        else:
+            print("Author not found.")
+        if retrieved_article.magazine:
+            print(f"Article Magazine: {retrieved_article.magazine.name}")
+        else:
+            print("Magazine not found.")
     else:
-        print("Failed to retrieve the magazine")
-
-    # Update the magazine"s name
-    new_magazine.name = "Tech Tomorrow" 
-    print(f"Magazine updated: {new_magazine}")
-
-    # Delete the magazine
-    Magazine.delete(new_magazine.id) 
-    print(f"Magazine with ID {new_magazine.id} deleted")
-
-    #Verify the deletion
-    retrieved_magazine = Magazine.get_by_id(new_magazine.id) 
-    if retrieved_magazine: 
-        print(f"Failed to delete magazine: {retrieved_magazine}") 
-    else: 
-        print("Magazine deletion verified")
-
-    # Create new article
-    new_article = Article(0, article_title, article_content, new_author.id, new_magazine.id) 
-    print(f"New Article created with ID: {new_article.id}, Title: {new_article.title}")
-
-    # Verify the article is added to the database
-    retrieved_article = Article.get_by_id(new_article.id) 
-    if retrieved_article: 
-        print(f"Retrieved Article: {retrieved_article.title}") 
-        print(f"Article Author: {retrieved_article.author.name}") 
-        print(f"Article Magazine: {retrieved_article.magazine.name}") 
-    else: 
-        print("Article retrieval failed")
-
-    # Test Author methods
-    author_articles = new_author.articles() 
-    print(f"Articles by {new_author.name}: {[article.title for article in author_articles]}")
-
-    author_magazines = new_author.magazines() 
-    print(f"Magazines associated with {new_author.name}: {[magazine.name for magazine in author_magazines]}")
-
-    # Test Magazine methods
-    magazine_articles = new_magazine.articles() 
-    print(f"Articles in {new_magazine.name}: {[article.title for article in magazine_articles]}")
-
-    magazine_contributors = new_magazine.contributors() 
-    print(f"Contributors to {new_magazine.name}: {[author.name for author in magazine_contributors]}")
-
-    # Attempt to change the title(should print error message)
-    new_article.title = "AI in 2025"
-
-    #Delete the article
-    Article.delete(new_article.id) 
-    print(f"Article with ID {new_article.id} deleted")
-
-    # Verify the article is deleted
-    retrieved_article = Article.get_by_id(new_article.id) 
-    if retrieved_article: 
-        print(f"Failed to delete article: {retrieved_article}") 
-    else: 
-        print("Article deletion verified, not found")
-
-    # Test article_titles method
-    print("Testing article_titles method...") 
-    titles = new_magazine.article_titles() 
-    if titles: 
-        print(f"Article Titles: {titles}") 
-    else: 
-        print("No articles found for this magazine")
-    
-    #Test contributing_authors method
-    print("Testing contributing_authors method...") 
-    contributing_authors = new_magazine.contributing_authors() 
-    if contributing_authors: 
-        print(f"Contributing Authors: {[author.name for author in contributing_authors]}") 
-    else: 
-        print("No contributing authors found for this magazine")
-
-
-
+        print("Article retrieval failed.")
 
 if __name__ == "__main__":
     main()
