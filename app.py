@@ -120,5 +120,32 @@ def main():
     else: 
         print("Magazine deletion verified")
 
+    # Create new article
+    new_article = Article(0, article_title, article_content, new_author.id, new_magazine.id) 
+    print(f"New Article created with ID: {new_article.id}, Title: {new_article.title}")
+
+    # Verify the article is added to the database
+    retrieved_article = Article.get_by_id(new_article.id) 
+    if retrieved_article: 
+        print(f"Retrieved Article: {retrieved_article.title}") 
+    else: 
+        print("Article retrieval failed")
+
+    # Attempt to change the title(should print error message)
+    new_article.title = "AI in 2025"
+
+    #Delete the article
+    Article.delete(new_article.id) 
+    print(f"Article with ID {new_article.id} deleted")
+
+    # Verify the article is deleted
+    retrieved_article = Article.get_by_id(new_article.id) 
+    if retrieved_article: 
+        print(f"Failed to delete article: {retrieved_article}") 
+    else: 
+        print("Article deletion verified, not found")
+
+
+
 if __name__ == "__main__":
     main()
