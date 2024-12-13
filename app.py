@@ -68,21 +68,57 @@ def main():
 
 
     #Create new author
-    new_author = Author(1, "John Doe")
+    new_author = Author.create("John Doe") 
+    print(f"New Author created with ID: {new_author.id}")
 
     #Verify the author is added to the database
-    retrieved_author = Author.get_by_id(new_author.id)
-    print(retrieved_author.name)
+    retrieved_author = Author.get_by_id(new_author.id) 
+    if retrieved_author: 
+        print(f"Retrieved Author: {retrieved_author.name}") 
+    else: 
+        print("Author retrieval failed")
 
     #Attempt to change the name(should print an error message)
     new_author.name = "Jane Doe"
 
     #Delete the author
-    Author.delete(new_author.id)
+    Author.delete(new_author.id) 
+    print(f"Author with ID {new_author.id} deleted")
 
     #Verify the author is deleted
-    retrieved_author = Author.get_by_id(new_author.id)
-    print(retrieved_author)
+    retrieved_author = Author.get_by_id(new_author.id) 
+    if retrieved_author: 
+        print(f"Failed to delete author: {retrieved_author}") 
+    else: 
+        print("Author deletion verified, not found")
+
+    #Testing Magazine class
+    print("Creating new magazine...")
+    new_magazine = Magazine(0, "Tech Today", "Technology")
+
+    print(f"Magazine created: {new_magazine}")
+
+    # Retrieve the magazine by ID
+    retrieved_magazine = Magazine.get_by_id(new_magazine.id)
+    if retrieved_magazine:
+        print(f"Magazine_retrieved: {retrieved_magazine}")
+    else:
+        print("Failed to retrieve the magazine")
+
+    # Update the magazine"s name
+    new_magazine.name = "Tech Tomorrow" 
+    print(f"Magazine updated: {new_magazine}")
+
+    # Delete the magazine
+    Magazine.delete(new_magazine.id) 
+    print(f"Magazine with ID {new_magazine.id} deleted")
+
+    #Verify the deletion
+    retrieved_magazine = Magazine.get_by_id(new_magazine.id) 
+    if retrieved_magazine: 
+        print(f"Failed to delete magazine: {retrieved_magazine}") 
+    else: 
+        print("Magazine deletion verified")
 
 if __name__ == "__main__":
     main()
