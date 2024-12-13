@@ -154,3 +154,5 @@ class Magazine:
                 return None
         finally:
             conn.close()
+
+

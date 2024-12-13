@@ -87,3 +87,5 @@ class Author:
         rows = cursor.fetchall()
         conn.close()
         return [Magazine(row['id'], row['name'], row['category']) for row in rows]
+
+

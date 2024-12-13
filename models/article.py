@@ -120,3 +120,5 @@ class Article:
                 print(f"No article found with ID {article_id}")
         finally:
             conn.close()
+
+
