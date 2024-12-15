@@ -156,3 +156,4 @@ class Magazine:
             conn.close()
 
 
+

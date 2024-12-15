@@ -89,3 +89,4 @@ class Author:
         return [Magazine(row['id'], row['name'], row['category']) for row in rows]
 
 
+
